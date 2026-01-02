@@ -1,0 +1,41 @@
+:root {
+  /* Dark Dashboard Theme (Default) */
+  --bg-main: #0e1015;
+  --bg-card: #1e1f2b;
+  --bg-date-box: #2a2b36;
+  
+  --primary: #246bfd;
+  --on-primary: #ffffff;
+  
+  --text-main: #ffffff;
+  --text-muted: #6c6d7a;
+  --text-highlight: #246bfd;
+  
+  --border-subtle: #2a2b36;
+  
+  /* Spacing */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+[data-mode="light"] {
+  --bg-main: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-date-box: #e8eaed;
+  
+  --primary: #1a73e8;
+  --on-primary: #ffffff;
+  
+  --text-main: #202124;
+  --text-muted: #5f6368;
+  --text-highlight: #1a73e8;
+  
+  --border-subtle: #dadce0;
+}

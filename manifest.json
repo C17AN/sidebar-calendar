@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Drag D-Day",
+  "version": "0.1",
+  "description": "Drag and drop YYYY-MM-DD dates to schedule notifications.",
+  "permissions": ["storage", "alarms", "notifications", "sidePanel"],
+  "action": {
+    "default_title": "Open Drag D-Day"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}
