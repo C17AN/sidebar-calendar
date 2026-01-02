@@ -8,7 +8,7 @@ async function updateBadge() {
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   const todayStr = `${year}-${month}-${day}`;
-  
+
   const count = items.filter(item => item.date === todayStr).length;
 
   if (count > 0) {
@@ -67,7 +67,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (item) {
       chrome.notifications.create(alarm.name, {
         type: 'basic',
-        iconUrl: 'icon128.png',
+        iconUrl: 'assets/icon128.png',
         title: item.title || 'D-Day Reminder',
         message: `${item.title || 'D-Day'} for ${item.date} is here!`,
         priority: 2
@@ -82,16 +82,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     addItem(request.date, request.title || 'D-Day').then(() => {
       sendResponse({ success: true });
       updateBadge();
-      
+
       chrome.notifications.create(`added-${Date.now()}`, {
         type: 'basic',
-        iconUrl: 'icon128.png',
+        iconUrl: 'assets/icon128.png',
         title: 'D-Day Added',
         message: `Saved "${request.title}" for ${request.date}`,
         priority: 1
       });
     });
-    return true; 
+    return true;
   }
 
   if (request.type === 'OPEN_SIDE_PANEL') {

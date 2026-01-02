@@ -32,13 +32,16 @@ input, select, textarea {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-md);
-  padding: 0 4px;
+  padding: 8px 4px 0px 4px;
 }
 
 .calendar-header h2 {
   font-size: 1.1rem;
   font-weight: 700;
-  margin: 0;
+}
+
+.side-padding {
+  padding: 0 16px;
 }
 
 .nav-controls {
@@ -110,6 +113,16 @@ input, select, textarea {
   font-weight: bold;
 }
 
+.day-cell.selected {
+  border: 2px solid var(--primary);
+  box-sizing: border-box;
+}
+
+.day-cell.today.selected {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .event-dot {
   width: 4px;
   height: 4px;
@@ -123,7 +136,27 @@ input, select, textarea {
   background-color: white;
 }
 
-/* Next Up Section */
+/* Scrollable content area */
+#content-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding-bottom: 20px; /* Extra space at bottom */
+}
+
+#content-scroll-area::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: 0;
+  /* margin-bottom: var(--spacing-lg); */
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -136,28 +169,25 @@ input, select, textarea {
   padding: 0 4px;
 }
 
-.event-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-right: 4px;
-}
-
-.event-list::-webkit-scrollbar {
-  width: 4px;
-}
-.event-list::-webkit-scrollbar-thumb {
-  background: var(--bg-card);
-  border-radius: 4px;
+.add-manual-btn {
+  width: 100%;
+  background-color: var(--bg-main);
+  color: var(--text-muted);
+  border: 1px dashed var(--border-subtle);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 8px 0 16px 0;
 }
 
 .event-card {
   display: flex;
   align-items: center;
   background-color: var(--bg-card);
-  padding: 12px;
+  padding: 8px; /* Increased to 16px to match standard side padding and ensure square-like balance */
   border-radius: var(--radius-md);
   gap: var(--spacing-md);
   transition: transform 0.1s;
@@ -171,37 +201,65 @@ input, select, textarea {
 .date-box {
   background-color: var(--bg-date-box);
   border-radius: var(--radius-sm);
-  padding: 6px 10px;
+  padding: 6px 4px; /* Slightly narrower padding */
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 36px;
+  min-width: 42px; /* Increased to accommodate D-Day text */
+  flex-shrink: 0;
+  gap: 2px;
 }
 
 .date-box .month {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--text-muted);
+  line-height: 1;
 }
 
 .date-box .day {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--text-main);
+  line-height: 1;
 }
 
 .info {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
 .info .title {
-  font-size: 0.9rem;
+  font-size: 0.95rem; /* Slightly larger title since it has more room */
   font-weight: 600;
-  white-space: nowrap;
+  margin-bottom: 2px;
+  display: block; /* No longer need flex for badge */
+}
+
+.title-content {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.dday-badge {
+  font-size: 0.6rem; /* Smaller for date-box */
+  background-color: var(--primary);
+  color: var(--on-primary);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  opacity: 1;
+  flex-shrink: 0;
+  width: 100%; /* Fill width for better centering */
+  box-sizing: border-box;
+  text-align: center;
   margin-bottom: 2px;
 }
 
@@ -224,23 +282,25 @@ input, select, textarea {
 /* Footer */
 .settings-footer {
   margin-top: auto;
-  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-subtle);
+  padding: 8px 0 8px 0;
 }
 
 .settings-btn {
   width: 100%;
   background-color: var(--bg-card);
   color: var(--text-main);
-  border: none;
+  border: 1px solid var(--border-subtle);
   padding: 12px;
   border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
+  margin-bottom: 0;
 }
 
 .settings-btn:hover {
-  background-color: #2a2c3d;
+  filter: brightness(1.1);
 }
 
 /* Dialog */
@@ -308,6 +368,34 @@ input, select {
   background: rgba(36, 107, 253, 0.9);
   color: white;
   font-weight: bold;
+}
+
+/* Dynamic Urgency Colors */
+.dday-badge.urgent { background-color: #d93025; } /* D-Day (Red) */
+.dday-badge.near   { background-color: #e67c73; } /* D-1 ~ D-2 (Soft Red) */
+.dday-badge.soon   { background-color: #f29900; } /* D-3 ~ D-5 (Orange) */
+.dday-badge.calm   { background-color: #1a73e8; opacity: 0.8; } /* D-6 ~ D-14 (Sky Blue) */
+.dday-badge.future { background-color: var(--primary); } /* D-15+ (Deep Blue) */
+.dday-badge.past   { background-color: #5f6368; } /* Past (Gray) */
+
+.delete-btn-card {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.delete-btn-card:hover {
+  color: #d93025;
+}
+
+.centered-container {
+  padding: 16px 0;
+  text-align: center;
 }
 
 .hidden { display: none !important; }

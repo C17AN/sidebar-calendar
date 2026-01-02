@@ -12,14 +12,25 @@ export async function saveItems(items) {
   await chrome.storage.local.set({ [STORAGE_KEYS.ITEMS]: items });
 }
 
-export async function addItem(date, title = 'D-Day') {
+export async function addItem(dateOrItem, title = 'D-Day') {
   const items = await getItems();
-  const newItem = {
-    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    date,
-    title,
-    createdAt: Date.now()
-  };
+  let newItem;
+  
+  if (typeof dateOrItem === 'object') {
+    newItem = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      createdAt: Date.now(),
+      ...dateOrItem
+    };
+  } else {
+    newItem = {
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      date: dateOrItem,
+      title,
+      createdAt: Date.now()
+    };
+  }
+  
   items.push(newItem);
   await saveItems(items);
   return newItem;

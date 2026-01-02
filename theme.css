@@ -28,7 +28,7 @@
 [data-mode="light"] {
   --bg-main: #f8f9fa;
   --bg-card: #ffffff;
-  --bg-date-box: #e8eaed;
+  --bg-date-box: #f1f3f4;
   
   --primary: #1a73e8;
   --on-primary: #ffffff;
@@ -37,5 +37,5 @@
   --text-muted: #5f6368;
   --text-highlight: #1a73e8;
   
-  --border-subtle: #dadce0;
+  --border-subtle: #dee2e6;
 }
