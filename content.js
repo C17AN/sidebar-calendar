@@ -47,18 +47,17 @@ async function syncSettings() {
   }
 }
 
-const translations = {
-  'en-US': { add: 'Add Event', save: 'Save', cancel: 'Cancel', saved: '✓ Saved!', today: 'Today', placeholder: 'Enter event name' },
-  'ko-KR': { add: '일정 추가', save: '저장', cancel: '취소', saved: '✓ 저장됨!', today: '오늘', placeholder: '일정 이름을 입력하세요' }
-};
-
 function t(key) {
-  let lang = currentSettings.language || 'en-US';
-  if (lang.startsWith('ko')) lang = 'ko-KR';
-  if (lang.startsWith('en')) lang = 'en-US';
-  
-  const dict = translations[lang] || translations['en-US'];
-  return dict[key] || translations['en-US'][key];
+  // Map internal keys to i18n keys
+  const keyMap = {
+    'add': 'contentAdd',
+    'save': 'contentSave',
+    'cancel': 'contentCancel',
+    'saved': 'contentSaved',
+    'today': 'contentToday',
+    'placeholder': 'contentPlaceholder'
+  };
+  return chrome.i18n.getMessage(keyMap[key] || key);
 }
 
 function getActualMode() {
@@ -177,12 +176,25 @@ window.addEventListener('resize', removeAddOverlay);
 
 // --- Reminder Pill ---
 async function checkTodaySchedule() {
-  const result = await chrome.storage.local.get('dday_items');
+  const result = await chrome.storage.local.get(['dday_items', 'last_reminder_close_time']);
   const items = result.dday_items || [];
+  const lastCloseTime = result.last_reminder_close_time || 0;
+  
+  // Don't show if closed within the last hour
+  if (Date.now() - lastCloseTime < 3600000) {
+    const existing = document.getElementById('dday-reminder-pill');
+    if (existing) existing.remove();
+    return;
+  }
+
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const todayItems = items.filter(item => item.date === todayStr);
   if (todayItems.length > 0) createReminderPill(todayItems);
+  else {
+    const existing = document.getElementById('dday-reminder-pill');
+    if (existing) existing.remove();
+  }
 }
 
 function createReminderPill(items) {
@@ -217,7 +229,11 @@ function createReminderPill(items) {
   const details = document.createElement('span'); details.className = 'details';
   details.textContent = items.slice(0, 2).map(i => i.title || 'D-Day').join(', ') + (items.length > 2 ? '...' : '');
   const closeBtn = document.createElement('button'); closeBtn.className = 'close-btn'; closeBtn.textContent = '×';
-  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); pillHost.remove(); });
+  closeBtn.addEventListener('click', (e) => { 
+    e.stopPropagation(); 
+    chrome.storage.local.set({ last_reminder_close_time: Date.now() });
+    pillHost.remove(); 
+  });
   content.append(title, details); pill.append(content, closeBtn);
   shadow.append(style, pill);
   document.body.appendChild(pillHost);
@@ -228,7 +244,7 @@ syncSettings().then(checkTodaySchedule);
 
 // Listen for settings changes
 chrome.storage.onChanged.addListener((changes) => {
-  if (changes.dday_settings || changes.dday_items) {
+  if (changes.dday_settings || changes.dday_items || changes.last_reminder_close_time) {
     syncSettings().then(() => {
       // Re-render pill if items changed or mode changed
       checkTodaySchedule();

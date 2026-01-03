@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Sidebar Calendar",
-  "version": "1.0",
-  "description": "웹에서 일정을 드래그해 등록하고, 사이드바에서 편리하게 확인하세요.",
+  "name": "__MSG_extName__",
+  "version": "1.2",
+  "default_locale": "en",
+  "description": "__MSG_extDescription__",
   "icons": {
     "16": "assets/icon16.png",
     "32": "assets/icon32.png",
@@ -11,7 +12,7 @@
   },
   "permissions": ["storage", "alarms", "notifications", "sidePanel"],
   "action": {
-    "default_title": "Open sidebar calendar",
+    "default_title": "__MSG_extName__",
     "default_icon": {
       "16": "assets/icon16.png",
       "32": "assets/icon32.png",

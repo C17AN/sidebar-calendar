@@ -181,6 +181,7 @@ input, select, textarea {
   cursor: pointer;
   transition: all 0.2s;
   margin: 8px 0 16px 0;
+  box-sizing: border-box; /* Ensure padding doesn't increase width */
 }
 
 .event-card {

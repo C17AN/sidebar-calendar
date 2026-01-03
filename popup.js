@@ -30,26 +30,25 @@ const themeSelect = document.getElementById('theme-select');
 const btnAddManual = document.getElementById('btn-add-manual');
 const dropOverlay = document.getElementById('drop-zone-overlay');
 
-// Labels for Translation
-const labels = {
-  'label-next-up': { 'en-US': 'NEXT UP', 'ko-KR': '다음 일정' },
-  'label-settings': { 'en-US': 'Settings', 'ko-KR': '설정' },
-  'label-theme': { 'en-US': 'Theme', 'ko-KR': '테마' },
-  'label-language': { 'en-US': 'Language', 'ko-KR': '언어' },
-  'label-lead-time': { 'en-US': 'Lead Time (Hours)', 'ko-KR': '알림 시간 (시간 전)' },
-  'btn-close-settings': { 'en-US': 'Done', 'ko-KR': '완료' },
-  'btn-settings': { 'en-US': '⚙️ Settings', 'ko-KR': '⚙️ 설정' },
-  'btn-add-manual': { 'en-US': '+ Add New Event', 'ko-KR': '+ 새 일정 추가하기' },
-
-  'label-edit-event': { 'en-US': 'Edit Event', 'ko-KR': '일정 수정' },
-  'label-add-event': { 'en-US': 'Add Event', 'ko-KR': '새 일정 추가' },
-  'label-title': { 'en-US': 'Title', 'ko-KR': '제목' },
-  'label-date': { 'en-US': 'Date', 'ko-KR': '날짜' },
-  'label-time': { 'en-US': 'Time (Optional)', 'ko-KR': '시간 (선택)' },
-  'label-location': { 'en-US': 'Location (Optional)', 'ko-KR': '장소 (선택)' },
-  'label-link': { 'en-US': 'Link (Optional)', 'ko-KR': '링크 (선택)' },
-  'btn-cancel-edit': { 'en-US': 'Cancel', 'ko-KR': '취소' },
-  'btn-save-edit': { 'en-US': 'Save', 'ko-KR': '저장' },
+// Map of element ID to i18n message key
+const i18nMap = {
+  'label-next-up': 'labelNextUp',
+  'label-settings': 'labelSettings',
+  'label-theme': 'labelTheme',
+  'label-language': 'labelLanguage',
+  'label-lead-time': 'labelLeadTime',
+  'btn-close-settings': 'btnCloseSettings',
+  'btn-settings': 'btnSettings',
+  'btn-add-manual': 'btnAddManual',
+  'btn-add-empty': 'btnAddManual',
+  'label-edit-event': 'labelEditEvent',
+  'label-title': 'labelTitle',
+  'label-date': 'labelDate',
+  'label-time': 'labelTime',
+  'label-location': 'labelLocation',
+  'label-link': 'labelLink',
+  'btn-cancel-edit': 'btnCancelEdit',
+  'btn-save-edit': 'btnSaveEdit'
 };
 
 // Edit Dialog Elements
@@ -66,11 +65,28 @@ let currentDate = new Date();
 let editingItemId = null;
 let currentLang = 'en-US';
 let selectedDateStr = null;
+let uiMessages = {};
+
+async function loadMessages(lang) {
+  const locale = lang.startsWith('ko') ? 'ko' : 'en';
+  const url = chrome.runtime.getURL(`_locales/${locale}/messages.json`);
+  try {
+    const response = await fetch(url);
+    uiMessages = await response.json();
+  } catch (e) {
+    console.error('Failed to load messages', e);
+  }
+}
+
+function getMsg(key) {
+  return uiMessages[key]?.message || chrome.i18n.getMessage(key) || key;
+}
 
 async function renderDashboard() {
   const settings = await getSettings();
   currentLang = settings.language || 'en-US';
 
+  await loadMessages(currentLang);
   applyThemeMode(settings.themeMode || 'system');
   applyTranslations();
   renderCalendar(currentDate);
@@ -87,10 +103,10 @@ function applyThemeMode(mode) {
 }
 
 function applyTranslations() {
-  for (const [id, texts] of Object.entries(labels)) {
+  for (const [id, key] of Object.entries(i18nMap)) {
     const el = document.getElementById(id);
     if (el) {
-      el.textContent = texts[currentLang] || texts['en-US'];
+      el.textContent = getMsg(key);
     }
   }
 
@@ -108,15 +124,10 @@ function applyTranslations() {
   const systemOpt = themeSelect.querySelector('option[value="system"]');
   const darkOpt = themeSelect.querySelector('option[value="dark"]');
   const lightOpt = themeSelect.querySelector('option[value="light"]');
-  if (currentLang === 'ko-KR') {
-    systemOpt.textContent = '시스템 설정';
-    darkOpt.textContent = '다크 모드';
-    lightOpt.textContent = '라이트 모드';
-  } else {
-    systemOpt.textContent = 'System';
-    darkOpt.textContent = 'Dark';
-    lightOpt.textContent = 'Light';
-  }
+  
+  systemOpt.textContent = getMsg('themeSystem');
+  darkOpt.textContent = getMsg('themeDark');
+  lightOpt.textContent = getMsg('themeLight');
 }
 
 async function renderCalendar(date) {
@@ -212,9 +223,7 @@ function updateSelectedDateHeader() {
   const selDate = new Date(selectedDateStr);
   const mName = selDate.toLocaleDateString(currentLang, { month: 'long' });
   const dNum = selDate.getDate();
-  labelSelectedDateHeader.textContent = currentLang === 'ko-KR'
-    ? `${mName} ${dNum}일 일정`
-    : `${mName} ${dNum} Schedule`;
+  labelSelectedDateHeader.textContent = `${mName} ${dNum}${getMsg('dateHeaderSuffix')}`;
 }
 
 function renderEventCards(container, listItems) {
@@ -259,7 +268,7 @@ function createEventCard(item) {
 
   const card = document.createElement('div');
   card.className = 'event-card';
-  card.title = currentLang === 'ko-KR' ? '클릭하여 수정' : 'Click to Edit';
+  card.title = getMsg('editHint');
 
   let titleHtml = item.title || 'Event';
   if (item.link) titleHtml = `<a href="${item.link}" target="_blank">${item.title || 'Event'} 🔗</a>`;
@@ -267,7 +276,7 @@ function createEventCard(item) {
   let detailsHtml = '';
   if (item.time) detailsHtml += `<span>🕒 ${item.time}</span>`;
   if (item.location) detailsHtml += `<span>📍 ${item.location}</span>`;
-  if (!item.time && !item.location) detailsHtml = currentLang === 'ko-KR' ? '하루 종일' : 'All Day';
+  if (!item.time && !item.location) detailsHtml = getMsg('allDayText');
 
   card.innerHTML = `
     <div class="date-box">
@@ -293,7 +302,7 @@ function createEventCard(item) {
   deleteBtn.className = 'delete-btn-card'; 
   deleteBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    const confirmText = currentLang === 'ko-KR' ? '이 일정을 삭제하시겠습니까?' : 'Delete this event?';
+    const confirmText = getMsg('deleteConfirm');
     if (confirm(confirmText)) await deleteItem(item.id);
   });
   card.appendChild(deleteBtn);
@@ -306,7 +315,7 @@ function openEditDialog(item = null) {
 
   if (item) {
     editingItemId = item.id;
-    dialogTitle.textContent = labels['label-edit-event'][currentLang];
+    dialogTitle.textContent = getMsg('labelEditEvent');
     editTitle.value = item.title || '';
     editDate.value = item.date;
     editTime.value = item.time || '';
@@ -315,7 +324,7 @@ function openEditDialog(item = null) {
   } else {
     // New item mode
     editingItemId = null;
-    dialogTitle.textContent = labels['label-add-event'][currentLang];
+    dialogTitle.textContent = getMsg('labelAddEvent');
     editTitle.value = '';
     // Use selectedDateStr or today in local time
     const now = new Date();
