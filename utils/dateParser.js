@@ -49,6 +49,44 @@ export function parseDates(text) {
     }
   }
 
+  // 2.5 No Year: MM/DD, MM.DD, MM-DD
+  // Default to current year.
+  // Avoid matching parts of full dates (e.g. 2024-01-01 should not match 01-01)
+  const currentYear = new Date().getFullYear();
+  const noYearRegex = /\b(\d{1,2})[-/.](\d{1,2})\b/g;
+  while ((match = noYearRegex.exec(text)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    
+    // Check if part of a longer date sequence
+    const prevChar = text[start - 1];
+    const nextChar = text[end];
+    const isSeparator = (c) => c === '-' || c === '/' || c === '.';
+    
+    if (isSeparator(prevChar) || isSeparator(nextChar)) {
+      continue;
+    }
+
+    let p1 = parseInt(match[1], 10);
+    let p2 = parseInt(match[2], 10);
+    let month, day;
+
+    if (p1 > 12) {
+      // Must be DD/MM
+      day = p1.toString().padStart(2, '0');
+      month = p2.toString().padStart(2, '0');
+    } else {
+      // Default to MM/DD
+      month = p1.toString().padStart(2, '0');
+      day = p2.toString().padStart(2, '0');
+    }
+
+    if (parseInt(month) >= 1 && parseInt(month) <= 12 && parseInt(day) >= 1 && parseInt(day) <= 31) {
+      const normalized = `${currentYear}-${month}-${day}`;
+      if (!dates.includes(normalized)) dates.push(normalized);
+    }
+  }
+
   // 3. Text: Month DD, YYYY or DD Month YYYY
   // e.g. Jan 12, 2026, 12 January 2026, Feb 21, 2018
   const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
