@@ -345,7 +345,7 @@ input, select {
   margin-top: 16px;
 }
 
-.btn-save, .btn-close {
+.btn-save {
   background: var(--primary);
   color: white;
   border: none;
@@ -353,6 +353,19 @@ input, select {
   border-radius: var(--radius-full);
   cursor: pointer;
   flex: 1;
+}
+
+.btn-close {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16px;
+  font-weight: 600;
 }
 
 .btn-cancel {
@@ -363,6 +376,22 @@ input, select {
   border-radius: var(--radius-full);
   cursor: pointer;
   flex: 1;
+}
+
+.btn-secondary {
+  background: var(--bg-main);
+  color: var(--primary);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  width: 100%;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  background: var(--bg-card);
+  border-color: var(--primary);
 }
 
 #drop-zone-overlay {

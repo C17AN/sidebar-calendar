@@ -30,5 +30,10 @@
   "themeSystem": { "message": "시스템 설정" },
   "themeDark": { "message": "다크 모드" },
   "themeLight": { "message": "라이트 모드" },
-  "dateHeaderSuffix": { "message": "일 일정" }
+  "dateHeaderSuffix": { "message": "일 일정" },
+  "btnSyncGCal": { "message": "구글 캘린더 동기화" },
+  "syncing": { "message": "동기화 중..." },
+  "synced": { "message": "(일정 $1건 동기화 완료)" },
+  "syncError": { "message": "오류" },
+  "syncFailed": { "message": "동기화 실패" }
 }

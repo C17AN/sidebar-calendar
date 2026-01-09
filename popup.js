@@ -1,5 +1,6 @@
 import { parseDates } from './utils/dateParser.js';
 import { getItems, addItem, updateItem, deleteItem, getSettings, saveSettings, STORAGE_KEYS } from './utils/storage.js';
+import { syncGoogleCalendar } from './utils/gcal.js';
 
 // DOM Elements
 const currentMonthEl = document.getElementById('current-month');
@@ -25,6 +26,7 @@ const btnCloseSettings = document.getElementById('btn-close-settings');
 const leadHoursInput = document.getElementById('leadHours');
 const languageSelect = document.getElementById('language-select');
 const themeSelect = document.getElementById('theme-select');
+const btnSyncGCal = document.getElementById('btn-sync-gcal'); // New Button
 
 // Manual Add
 const btnAddManual = document.getElementById('btn-add-manual');
@@ -48,7 +50,8 @@ const i18nMap = {
   'label-location': 'labelLocation',
   'label-link': 'labelLink',
   'btn-cancel-edit': 'btnCancelEdit',
-  'btn-save-edit': 'btnSaveEdit'
+  'btn-save-edit': 'btnSaveEdit',
+  'btn-sync-gcal': 'btnSyncGCal'
 };
 
 // Edit Dialog Elements
@@ -409,6 +412,35 @@ themeSelect.addEventListener('change', async () => {
   settings.themeMode = themeSelect.value;
   await saveSettings(settings);
   applyThemeMode(settings.themeMode);
+});
+
+btnSyncGCal.addEventListener('click', async () => {
+  const originalText = getMsg('btnSyncGCal');
+  btnSyncGCal.textContent = getMsg('syncing');
+  btnSyncGCal.disabled = true;
+
+  const result = await syncGoogleCalendar();
+  
+  if (result.success) {
+    // Reload dashboard to show new items
+    await renderDashboard();
+    
+    const totalAdded = result.addedToLocal + result.addedToGCal;
+    const syncedMsgTemplate = getMsg('synced'); 
+    btnSyncGCal.textContent = syncedMsgTemplate.replace('$1', totalAdded);
+    
+    setTimeout(() => {
+      btnSyncGCal.textContent = getMsg('btnSyncGCal');
+      btnSyncGCal.disabled = false;
+    }, 3000);
+  } else {
+    btnSyncGCal.textContent = getMsg('syncError');
+    console.error(result.error);
+    const failMsg = getMsg('syncFailed');
+    alert(`${failMsg}: ` + (result.error.message || JSON.stringify(result.error)) + '\n\nNote: Check Client ID & API Access.');
+    btnSyncGCal.disabled = false;
+    setTimeout(() => btnSyncGCal.textContent = getMsg('btnSyncGCal'), 2000);
+  }
 });
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => {

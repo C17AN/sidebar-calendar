@@ -30,5 +30,10 @@
   "themeSystem": { "message": "System" },
   "themeDark": { "message": "Dark" },
   "themeLight": { "message": "Light" },
-  "dateHeaderSuffix": { "message": " Schedule" }
+  "dateHeaderSuffix": { "message": " Schedule" },
+  "btnSyncGCal": { "message": "Sync Google Calendar" },
+  "syncing": { "message": "Syncing..." },
+  "synced": { "message": "($1 events synced)" },
+  "syncError": { "message": "Error" },
+  "syncFailed": { "message": "Sync Failed" }
 }
